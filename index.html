@@ -15,7 +15,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+		<link rel="stylesheet" href="css/theme/white.css" id="theme">
 
 		<!-- Code syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -32,6 +32,24 @@
 		<!--[if lt IE 9]>
 		<script src="lib/js/html5shiv.js"></script>
 		<![endif]-->
+		<style type="text/css">
+.grid3 {
+	width: 30%;
+	display: inline-block;
+}
+.red {
+	color: #F57474 !important;
+}
+.violet {
+	color: #C56CDD !important;
+}
+.blue {
+	color: #7C56ED !important;
+}
+img {
+	border: none !important;
+}
+		</style>
 	</head>
 
 	<body>
@@ -40,7 +58,726 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-				<section>
+
+<section>
+	<h1>go types</h1>
+</section>
+
+
+<section>
+	<span class="grid3 red">1 Basics</span>
+	<span class="grid3 violet">2 Behavior</span>
+	<span class="grid3 blue">3 Generics</span>
+</section>
+
+
+<!-- ============================================ -->
+
+<section data-background="#F57474" data-background-transition="zoom">
+	<h2 style="color: white">1 Basics</h2>
+</section>
+
+<!-- ============================================ -->
+
+<section>
+	<h3>Statically typed vs dynamically typed?</h3>
+	Dynamic typing:
+	<pre><code data-trim class="go">
+func Reduce( A, B ) {
+  return A - B
+}
+	</code></pre>
+
+	<pre class="fragment"><code data-trim class="go">
+Reduce(3, 2)  =>  1
+	</code></pre>
+
+	<pre class="fragment"><code data-trim class="go">
+Reduce("Dog", "Cat")  =>  NaN
+	</code></pre>
+</section>
+
+<section>
+	<h3>Static typing to the rescue</h3>
+	<pre><code data-trim class="go">
+func( A Number, B Number ) Number {
+  return A + B
+}
+	</code></pre>
+	<pre class="fragment"><code data-trim class="go">
+Reduce(3, 2)  =>  1
+	</code></pre>
+
+	<pre class="fragment"><code data-trim class="go">
+Reduce("Dog", "Cat")  =>  Won't compile
+	</code></pre>
+
+</section>
+
+<section>
+	<h3>Static used to be known for:</h3>
+
+	Code bloat:
+<pre><code data-trim class="go">
+Map&lt;String, Foo> mapOfFoo = new HashMap&lt;String, Foo>();
+List&lt;Integer> lInt = new List&lt;Integer>(1,2,3);
+</code></pre>
+
+vs
+
+<pre><code data-trim class="go">
+mapOfFoo = {}
+lInt = [1,2,3]
+</code></pre>
+
+</section>
+
+<section>
+	<h3>Static used to be known for:</h3>
+
+	and tricky handling
+<pre><code data-trim class="go">
+JSONObject obj = new JSONObject(" .... ");
+String pageName = obj.getJSONObject("pageInfo").getString("pageName");
+JSONArray arr = obj.getJSONArray("posts");
+...
+</code></pre>
+
+vs
+
+<pre><code data-trim class="go">
+page.pageInfo.pageName ...
+</code></pre>
+
+</section>
+
+<section>
+	<h3>Go combines static typing and simplicity</h3>
+
+	<pre><code data-trim class="go">
+a := "Pizza"
+var b string = "Dough"
+	</code></pre>
+</section>
+
+<section>
+	<h3>Specifying types</h3>
+	For declaration before use:
+	<pre><code data-trim class="go">
+var user User
+...
+if true {
+  user = Roy
+}
+	</code></pre>
+<div class="fragment">
+	Functions / Structs / ...
+<pre><code data-trim class="go">
+func Fun(a string) error {
+	...
+}
+</code></pre>
+	</div>
+
+<div class="fragment">
+	and a few corner-cases:
+	<pre><code data-trim class="go">
+var ax uint = 100
+var ay int64 = 100
+var az = len([]bool{}) // int
+_ = int64(ax) + ay + int64(az)
+	</code></pre>
+	</div>
+</section>
+
+<section>
+	<h3>Basic types</h3>
+Builtins: http://golang.org/pkg/builtin/
+<pre><code data-trim class="go">
+string, int, uint, byte, bool, string, rune ...
+
+error
+// for error conditions
+// message via: error.Error() string
+
+nil
+// pointer, channel, func, interface, map, or slice
+
+[]slice
+[n]array
+map[K]V
+pointer
+chan
+</code></pre>
+</section>
+
+<section>
+	<h3>Create your own!</h3>
+	<img src="gfx/jetcart.jpg">
+</section>
+
+<section>
+Convention:
+<pre><code data-trim class="go">
+type Name &lt;WHAT>
+</code></pre>
+In practice:
+<pre><code data-trim class="go">
+type Name string
+
+type Person struct {
+	First Name
+	Last  Name
+}
+</code></pre>
+</section>
+
+<section>
+	<h3>There is no Classes</h3>
+	But
+<div class="fragment">
+<pre><code data-trim class="go">
+bob := Person{ "Bob", "Walker" }
+bob.First = "Married"
+</code></pre>
+<pre><code data-trim class="go">
+func (p Person) FullName() string {
+	return string(p.First) + " " + string(p.Last)
+}
+
+bob.FullName()
+</code></pre>
+<pre><code data-trim class="go">
+func (n Name) Sir() string {
+	return "Sir "+string(n)
+}
+
+bob.First.Sir()
+</code></pre>
+	</div>
+</section>
+
+<section>
+	Let's say you have dog
+	<div class="fragment">
+		<img src="gfx/dog.png">
+	</div>
+	<div class="fragment">and a method:
+	<pre style="width:50%; text-align: center"><code data-trim class="go">
+func Send(A string)
+	</code></pre>
+</div>
+</section>
+
+<section>
+	<h3>Casting types</h3>
+	Strong or weak?
+</section>
+<section>
+<h3>Weak type casting</h3>
+Example: C
+<pre><code data-trim class="go">
+char c = 'a';
+void *p;
+(int)c + (int)p;
+</code></pre>
+Opposite: Haskell
+</section>
+
+<section>
+	<h3>Casting 101</h3>
+<pre><code data-trim class="go">
+var a float = 65.3
+var b int  = int(a)
+var c uint = uint(b)
+</code></pre>
+Works for all basic types (string, int, []byte)
+<div class="fragment">
+<pre><code data-trim class="go">
+a := 65
+=> 65
+
+var b string = string(a)
+=> "A"
+
+// 65000 => "\ufde8"
+</code></pre>
+</div>
+</section>
+<section>
+	<h3>Limitations</h3>
+<pre><code data-trim class="go">
+type Dog struct {
+	Name string
+}
+
+a := Dog{ "yom-yom" }
+
+string(a)
+	</code></pre>
+	Fails at compile time.
+</section>
+<section>
+	<h3>Pointers?</h3>
+<pre><code data-trim class="go">
+a := Dog{ "yum-yum" }
+// Give me the address of a:
+b := &a
+// Give me the object b points to:
+c := *b
+	</code></pre>
+<div class="fragment">
+Pointers retain type info
+<pre><code data-trim class="go">
+a := Dog{ "yum-yum" }
+b := &a
+var c string = *b
+	</code></pre>
+	Fails at compile-time
+	</div>
+</section>
+<section>
+	... and there is no pointer arithmetic to fool around.<br/>
+	<a href="https://golang.org/doc/faq#no_pointer_arithmetic">https://golang.org/doc/faq#no_pointer_arithmetic</a>
+</section>
+<section>
+	<h3>Type Assertions</h3>
+<pre><code data-trim class="go">
+myInterface.(TypeSth)
+	</code></pre>
+	Only works for interfaces!
+</section>
+<section>
+	<h3>interface{}</h3>
+	The empty interface, which all types implement.
+<pre><code data-trim class="go">
+var a = Dog{ "yom-yom" }
+var b interface{} = a
+var c = b.(string)
+	</code></pre>
+	Compiles just fine...
+</section>
+<section>
+	<h3>But when you run it:</h3>
+<pre><code data-trim class="bash">
+panic: interface conversion: interface is main.Dog, not string
+	</code></pre>
+	<small>(Not just with string, but also fails for similar struct...)</small>
+</section>
+<section>
+	<h3>Strong(ish) type casting.</h3>
+</section>
+
+<!-- ============================================ -->
+
+<section data-background="#C56CDD" data-background-transition="zoom">
+	<h2 style="color: white;">2 Behavior</h2>
+</section>
+
+<!-- ============================================ -->
+
+<section>
+	<h3>Interface</h3>
+<pre><code data-trim class="go">
+type Numbers []int
+func (n Numbers) Len() int {
+  return len(n)
+}
+
+a := Numbers{1,2,3}
+a.Len()
+	</code></pre>
+</section>
+
+<section>
+	Great start, how about people?
+<pre><code data-trim class="go">
+type People []string
+func (n People) Len() int {
+  return len(n)
+}
+
+b := People{"Adam","Curt"}
+b.Len()
+	</code></pre>
+</section>
+
+<section>
+	But...
+<pre><code data-trim class="go">
+func AddCount(obj ???) {
+  obj.Len()
+}
+	</code></pre>
+</section>
+
+<section>
+	<h3>Interface types</h3>
+<pre><code data-trim class="go">
+type Countable interface {
+  Len() int
+}
+
+func AddCount(obj Countable) { ... }
+
+var a Countable = Numbers{1, 2, 3}
+var b Countable = People{"Adam", "Curt"}
+	</code></pre>
+</section>
+
+<section>
+	<h3>Share methods</h3>
+<pre><code data-trim class="go">
+type Names []string
+func (n Names) Len() int           { return len(n) }
+func (n Names) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
+func (n Names) Less(i, j int) bool { return n[i] < n[j] }
+	</code></pre>
+	Now you can sort:
+<pre><code data-trim class="go">
+ppl := Names{"Bob","Atom","Marley"}
+sort.Sort(ppl)
+fmt.Printf("%v\n", ppl)
+</code></pre>
+</section>
+
+<section>
+	<h3>Behavior-driven coding.</h3>
+</section>
+
+<!-- ============================================ -->
+
+<section data-background="#7C56ED" data-background-transition="zoom">
+	<h2 style="color:white;">3 Advanced Concepts</h2>
+</section>
+
+<!-- ============================================ -->
+
+<section>
+<section>
+	<h3>No Polymorphism</h3>
+	Minimalist type system
+<blockquote cite="http://golang.org/doc/faq#Why_doesnt_Go_have_feature_X">
+Go was designed with an eye on felicity of programming, speed of compilation, orthogonality of concepts...
+</blockquote>
+</section>
+
+<section>
+	<h3>That being said...</h3>
+	You can still share common parts between structs:
+<pre><code data-trim class="go">
+type Address struct {
+  Street string
+  City string
+}
+type Person struct {
+  Name string
+  Address
+}
+</code></pre>
+<pre><code data-trim class="go">
+frank := Person{"Frank",Address{"Startplatz","Köln"}}
+
+frank.Address.City
+// => Köln
+
+frank.City
+// => Köln
+</code></pre>
+</section>
+
+<section>
+	<h3>Methods can be shared too...</h3>
+<pre><code data-trim class="go">
+func (a Address) Home() string {
+  return a.Street + " in " + a.City
+}
+</code></pre>
+<pre><code data-trim class="go">
+frank := Person{"Frank",Address{"Startplatz","Köln"}}
+
+frank.Address.Home()
+// => Startplatz in Köln
+
+frank.Home()
+// => Startplatz in Köln
+</code></pre>
+</section>
+
+<section>
+	<h3>Adding one more...</h3>
+<pre><code data-trim class="go">
+func (p Person) Home() string {
+  return p.Name + " at " + p.Address.Home()
+}
+</code></pre>
+
+<div class="fragment">
+<pre><code data-trim class="go">
+frank := Person{"Frank",Address{"Startplatz","Köln"}}
+
+frank.Address.Home()
+// => Startplatz in Köln
+
+frank.Home()
+// => Frank at Startplatz in Köln
+</code></pre>
+</div>
+<div class="fragment">
+This is not method overloading.
+</div>
+</section>
+
+<section data-background="gfx/transform.jpg">
+	<div style="width: 100%; padding: 1rem; background: #fff">
+		<h3 style="color: black; margin: 0">It just won't morph</h3>
+	</div>
+</section>
+<section data-background="gfx/transform.jpg">
+<pre><code data-trim class="go" style="border: 6px solid white;">
+type Car struct {
+	Name string
+}
+type Robot struct {
+	Name string
+	Car
+}
+</code></pre>
+<div class="fragment">
+<pre><code data-trim class="go" style="border: 6px solid white;">
+franky := Robot{"Franky",Car{"Wagon"}}
+
+franky.Name
+// => Franky
+
+franky.Car.Name
+// => Wagon
+</code></pre>
+</div>
+</section>
+<section data-background="gfx/transform.jpg">
+	<div style="width: 100%; padding: 1rem; background: #fff">
+		<h3 style="color: black; margin: 0">Declare and share,<br>but no Polymorphism</h3>
+	</div>
+</section>
+</section>
+
+<!-- ============================================ -->
+
+<section>
+<section>
+	<h3>No Generics</h3>
+<blockquote cite="http://golang.org/doc/faq#generics">
+Generics may well be added at some point. We don't feel an urgency for them, although we understand some programmers do.
+</blockquote>
+</section>
+
+<section>
+	<h3>Why Generics?</h3>
+<div class="fragment">
+<small>Scala example</small>
+<pre><code data-trim class="go">
+class Stack[T] {
+  var elems: List[T] = Nil
+  def push(x: T) { elems = x :: elems }
+  def top: T = elems.head
+  def pop() { elems = elems.tail }
+}
+</code></pre>
+<pre><code data-trim class="go">
+val stack = new Stack[Int]
+stack.push(1)
+stack.push('a')
+</code></pre>
+</div>
+</section>
+
+<section>
+	<h3>Generic-like functionality</h3>
+<pre><code data-trim class="go">
+func Save(data interface{}) {...}
+func Load() interface{} {...}
+
+Save(barks)
+barks := Load().(Dog)
+</code></pre>
+</section>
+
+<section>
+	Limitation: Loose compile-time type checking.<br/>
+	Likely needs reflect for advanced application.
+</section>
+
+<section>
+Like they do in json:
+<pre><code data-trim class="go">
+switch v.Kind() {
+case reflect.Interface:
+  if v.NumMethod() == 0 {
+    // Decoding into nil interface?  Switch to non-reflect code.
+    v.Set(reflect.ValueOf(d.arrayInterface()))
+    return
+  }
+  fallthrough
+default:
+  d.saveError(&UnmarshalTypeError{"array", v.Type()})
+  d.off--
+  d.next()
+  return
+case reflect.Array:
+case reflect.Slice:
+  break
+</code></pre>
+</section>
+
+<section>
+	<h3>Solution #1 Templating</h3>
+</section>
+
+<section>
+	<h3>Generate the code you need</h3>
+<pre><code data-trim class="go">
+type List struct {
+    data generic.T
+    next *List
+}
+</code></pre>
+<div class="fragment">
+<pre><code data-trim class="go">
+gengen list.go string > list_string.go
+</code></pre>
+</div>
+<div class="fragment">
+<pre><code data-trim class="go">
+type List struct {
+    data string
+    next *List
+}
+</code></pre>
+</div>
+</section>
+
+<section>
+	Limitations: Managing files and packaging.
+</section>
+
+<section>
+	<h3>Solution #2 <a href="https://clipperhouse.github.io/gen/">gen</a></h3>
+	Annotations f.t.w.
+</section>
+
+<section>
+	<h3>Generate via annotation</h3>
+<pre><code data-trim class="go">
+// +gen slice:"Where,Count,GroupBy[string]"
+type Person struct {}
+</code></pre>
+<pre><code data-trim class="go">
+gen
+</code></pre>
+</section>
+
+<section>
+	Also: Go 1.4 has
+<pre><code data-trim class="go">
+//go:generate
+</code></pre>
+</section>
+
+<section>
+	<h3>Solution #3 gonerics.io</h3>
+	GaaS, i.e. managed templates on demand
+</section>
+
+<section>
+	<h3>Generate the code you need</h3>
+<pre><code data-trim class="go">
+package main
+
+import (
+  "fmt"
+  "gonerics.io/d/set/string.git"
+)
+
+func main() {
+  set := set.New()
+  set.Add("a")
+  set.Add("b")
+
+  fmt.Println(set.Contains("a"), set.Contains("c"))
+}
+</code></pre>
+<pre><code data-trim class="go">
+go get gonerics.io/d/set/string.git
+</code></pre>
+</section>
+
+<section>
+	<h3>Generate the code you need</h3>
+<pre><code data-trim class="go">
+package main
+ 
+import (
+  "fmt"
+  "gonerics.io/d/set/int.git"
+)
+
+func main() {
+  set := set.New()
+  set.Add(1)
+  set.Add(2)
+  
+  fmt.Println(set.Contains(1), set.Contains(3))
+}
+</code></pre>
+<pre><code data-trim class="go">
+go get gonerics.io/d/set/int.git
+</code></pre>
+</section>
+
+<section>
+<h3>And even more functionality</h3>
+<pre><code data-trim class="go">
+"gonerics.io/f/functional/int.git"
+
+functional.Map(func(a int) int { return a * 2 }, s)
+functional.Filter(...)
+</code></pre>
+<pre><code data-trim class="go">
+"gonerics.io/d/set/T.git"
+type Graph map[T]set.Set
+</code></pre>
+</section>
+
+</section>
+
+<section>
+	Questions?
+</section>
+
+<!--
+
+Why would you even want Generics?
+
+		Best examples of what you can do with great typesystem: Scala/Haskell
+		Collection.map
+
+Great system allows you to do everything, usually at some cost:
+
+		1. Speed
+		2. Understanding
+		def hashcodes(l: Seq[_ <: AnyRef]) = l map (_.hashCode)
+
+
+Getting around your types:
+  1. write lots of code
+  2. interface{} and reflect
+  3. generators
+
+-->
+
+
+				<!-- <section>
 					<h1>Reveal.js</h1>
 					<h3>The HTML Presentation Framework</h3>
 					<p>
@@ -55,7 +792,6 @@
 					</p>
 				</section>
 
-				<!-- Example of nested vertical slides -->
 				<section>
 					<section>
 						<h2>Vertical Slides</h2>
@@ -162,7 +898,6 @@
 					<h2>Themes</h2>
 					<p>
 						reveal.js comes with a few themes built in: <br>
-						<!-- Hacks to swap themes after the page has loaded. Not flexible and only intended for the reveal.js demo deck. -->
 						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/black.css'); return false;">Black (default)</a> -
 						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/white.css'); return false;">White</a> -
 						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/league.css'); return false;">League</a> -
@@ -373,7 +1108,7 @@ Reveal.addEventListener( 'customevent', function() {
 						- <a href="http://slides.com">Try the online editor</a> <br>
 						- <a href="https://github.com/hakimel/reveal.js">Source code &amp; documentation</a>
 					</p>
-				</section>
+				</section> -->
 
 			</div>
 
@@ -392,7 +1127,7 @@ Reveal.addEventListener( 'customevent', function() {
 				history: true,
 				center: true,
 
-				transition: 'slide', // none/fade/slide/convex/concave/zoom
+				transition: 'fade', // none/fade/slide/convex/concave/zoom
 
 				// Optional reveal.js plugins
 				dependencies: [
